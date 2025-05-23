@@ -1,42 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../viewmodels/album_bloc.dart';
 import '../viewmodels/album_state.dart';
+import '../models/photo.dart';
 
-class AlbumListScreen extends StatelessWidget {
+class AlbumListScreen extends StatefulWidget {
   const AlbumListScreen({super.key});
+
+  @override
+  State<AlbumListScreen> createState() => _AlbumListScreenState();
+}
+
+class _AlbumListScreenState extends State<AlbumListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AlbumBloc>().add(FetchAlbums());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Albums'),
-      ),
+      appBar: AppBar(title: const Text('Albums')),
       body: BlocBuilder<AlbumBloc, AlbumState>(
         builder: (context, state) {
           if (state is AlbumLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is AlbumLoaded) {
             final albums = state.albums;
+            final photos = state.photos;
             return ListView.builder(
               itemCount: albums.length,
               itemBuilder: (context, index) {
                 final album = albums[index];
-                return ListTile(
-                  leading: Image.network(
-                    'https://picsum.photos/seed/album/100', // Any static image URL
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
+                final photo = photos.firstWhere(
+                  (p) => p.albumId == album.id,
+                  orElse: () => Photo(
+                    albumId: album.id,
+                    id: 0,
+                    title: 'No Photo',
+                    url: '',
+                    thumbnailUrl: '',
                   ),
-                  title: Text(album.title),
+                );
+                return ListTile(
+                    leading: Image.network(
+                      'https://picsum.photos/seed/album/99',
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text(photo.title),    
                   onTap: () {
-                    // Navigation or details logic here
+                    context.push('/album/${album.id}');
                   },
                 );
               },
             );
-          } else if (state is AlbumError) {
+          } 
+          else if (state is AlbumError) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

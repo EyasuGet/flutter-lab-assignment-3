@@ -4,7 +4,6 @@ class Photo {
   final String title;
   final String url;
   final String thumbnailUrl;
-
   Photo({
     required this.albumId,
     required this.id,
@@ -12,7 +11,6 @@ class Photo {
     required this.url,
     required this.thumbnailUrl,
   });
-
   factory Photo.fromJson(Map<String, dynamic> json) {
     return Photo(
       albumId: json['albumId'] as int,
